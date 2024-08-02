@@ -23,3 +23,14 @@
     - Each version of the software can use different versions of their dependencies. For instance, `MySQL 5.2` can use `glibc-2.18` while `MySQL 5.5` can use `glibc-2.19`.
     - We can have Python modules compiled with different versions of the GCC compiler. A `Python 2.7` module could be compiled with `GCC 4.6`, while a `Python 3` module could be compiled with `GCC 4.8`.
     - Nix ensures that these different versions and their dependencies do not interfere with each other, allowing them to coexist peacefully on the same system.
+
+## ISSUES with Nix-Package manager:
+
+* **OTHER Package Manager:** 
+    - (P1) When upgrading a library, most package managers replace it in-place. All new applications run afterwards with the new library without being recompiled.
+    - (P2) Unless software has in mind a pure functional model, or can be adapted to it, it can be hard to compose applications at runtime.
+    - Let's take `Firefox` for example. On most systems, you install flash, and it starts working in Firefox because Firefox looks in a global path for plugins.
+
+* **Nix Pacakge Manager:**
+    - (P1) Since Nix derivations are `immutable`, upgrading a library like glibc means **recompiling all applications**, because the glibc path to the Nix store has been hardcoded.
+    - (P2) In Nix, there's no such global path for plugins. Firefox therefore must know explicitly about the path to flash. The way we handle this problem is to **wrap the Firefox binary** so that **we can setup the necessary environment to make it find flash** in the nix store. That will produce a new Firefox derivation: be aware that it takes a few seconds, and it makes composition harder at runtime.
