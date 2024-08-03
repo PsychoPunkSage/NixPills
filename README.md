@@ -34,3 +34,6 @@
 * **Nix Pacakge Manager:**
     - (P1) Since Nix derivations are `immutable`, upgrading a library like glibc means **recompiling all applications**, because the glibc path to the Nix store has been hardcoded.
     - (P2) In Nix, there's no such global path for plugins. Firefox therefore must know explicitly about the path to flash. The way we handle this problem is to **wrap the Firefox binary** so that **we can setup the necessary environment to make it find flash** in the nix store. That will produce a new Firefox derivation: be aware that it takes a few seconds, and it makes composition harder at runtime.
+
+* **Upgrade/Degrade:**
+  - There are no upgrade/downgrade scripts for your data. There is no sense in this approach, because there's no real derivation to be upgraded. With Nix you switch to using other software with its own stack of dependencies, but there's no formal notion of upgrade or downgrade when doing so.
