@@ -53,3 +53,33 @@ lrwxrwxrwx - root  1 Jan  1970  mandb -> /nix/store/k46l5ki5ppfsrbz0wpzxs707z
 lrwxrwxrwx - root  1 Jan  1970  manpath -> /nix/store/k46l5ki5ppfsrbz0wpzxs707zxk9s669-man-db-2.12.1/bin/manpath
 lrwxrwxrwx - root  1 Jan  1970  whatis -> /nix/store/k46l5ki5ppfsrbz0wpzxs707zxk9s669-man-db-2.12.1/bin/whatis
 ```
+
+## Querying the store:
+All of the environment components point to the store.
+To query and manipulate the store, there's the `nix-store` command.
+
+> Get Runtime dependencies of `store`
+```bash
+nix-store -q --references `which hello`
+```
+
+```
+/nix/store/0wydilnf1c9vznywsvxqnaing4wraaxp-glibc-2.39-52
+/nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1
+```
+
+> Get reverse dependencies of `hello`
+```bash
+nix-store -q --referrers `which hello`
+```
+
+```
+/nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1
+/nix/store/7qd0iq76mp363d57yn5k3q4axb6vw78s-env-manifest.nix
+/nix/store/0ryx7ssprfgdkpfb2s322wclx51fwanr-user-environment
+/nix/store/954cj2jrgvj9scwc8xpfmiv3zqcfmqib-env-manifest.nix
+/nix/store/xck3xilgbd0przvbvqpk83alxxsdgggl-user-environment
+```
+* Our environments depend upon `hello` i.e. the environments are in the store, and since they contain symlinks to `hello`, therefore the environment depends upon `hello`.
+* Two environments were listed, generation 2 and generation 3, since these are the ones that had hello installed in them.
+* The **manifest.nix**(`~/.nix-profile/manifest.nix`) file contains metadata about the environment, such as which derivations are installed. So that nix-env can list, upgrade or remove them.
