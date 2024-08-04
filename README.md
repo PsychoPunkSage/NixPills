@@ -37,3 +37,8 @@
 
 * **Upgrade/Degrade:**
   - There are no upgrade/downgrade scripts for your data. There is no sense in this approach, because there's no real derivation to be upgraded. With Nix you switch to using other software with its own stack of dependencies, but there's no formal notion of upgrade or downgrade when doing so.
+
+## Walk-through:
+
+1. [Pill 1](https://github.com/PsychoPunkSage/NixPills/tree/main/pill1) - Nix Environment / interaction with Nix store
+2. [Pill 2](https://github.com/PsychoPunkSage/NixPills/tree/main/pill2) - Basics of the Nix language
