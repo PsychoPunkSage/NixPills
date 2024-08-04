@@ -40,6 +40,7 @@
 
 ## Walk-through:
 
-1. [Pill 1](https://github.com/PsychoPunkSage/NixPills/tree/main/pill1) - Nix Environment / interaction with Nix store
-2. [Pill 2](https://github.com/PsychoPunkSage/NixPills/tree/main/pill2) - Basics of the Nix language 
-3. [Pill 3](https://github.com/PsychoPunkSage/NixPills/tree/main/pill3) - Function + Imports
+1. [Pill 1](https://github.com/PsychoPunkSage/NixPills/tree/main/pill01) - Nix Environment / interaction with Nix store
+2. [Pill 2](https://github.com/PsychoPunkSage/NixPills/tree/main/pill02) - Basics of the Nix language
+3. [Pill 3](https://github.com/PsychoPunkSage/NixPills/tree/main/pill03) - Function + Imports
+4. [Pill 4](https://github.com/PsychoPunkSage/NixPills/tree/main/pill04) - First Derivation
