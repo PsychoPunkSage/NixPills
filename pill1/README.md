@@ -131,5 +131,11 @@ nix-channel --list
 # or you may see a channel whose name begins with "nixos-" instead of "nixpkgs".<br>
 ```
 **Location**: `~/.nix-channels` (its not a symlink to nix store)<br>
-**Update**: `nix-channel --update` (to update channel)<br>
+**Update(channels)**: `nix-channel --update` (to update channel)<br>
+**Update(packages)**: `nix-env -ue` (to update all packages)<br>
 new generation of the channels profile can be made under `~/.nix-defexpr/channels`
+
+## Resources:
+
+> [Cheatsheet](https://wiki.nixos.org/wiki/Cheatsheet)
+> [Upgrade Manual](https://nixos.org/manual/nix/stable/command-ref/nix-env#operation---upgrade)
