@@ -96,3 +96,58 @@ nix-repl> tmul {a = 12; b = 10;}
 120
 ```
 * Only a set with exactly the attributes required by the function is accepted, nothing more, nothing less. (NOT even different name)
+
+## Default and variadic attributes
+
+> We can specify `default values` of attributes in the argument set
+```nix
+nix-repl> mul = {a, b ? 3}: a*b
+
+nix-repl> mul
+«lambda @ «string»:1:2»
+
+nix-repl> mul {a = 12;}
+36
+
+nix-repl> mul {a = 12; b = 4;}
+48
+```
+
+> We can allow passing more attributes (`variadic`) than the expected ones
+```nix
+nix-repl> mul = {a,b,...}: a*b
+
+nix-repl> mul {a = 2; b = 3; c = 4;}
+6
+```
+
+> In the above function body you cannot access the "c" attribute. The solution is to give a name to the given set with the `@-pattern`
+```nix
+nix-repl> mul = set@{a,b,...}:a*b*set.c
+
+nix-repl> mul
+«lambda @ «string»:1:2»
+
+nix-repl> mul {a = 2; b = 3; c = 4;}
+24
+
+nix-repl> mul {a = 2; b = 3;}
+error:
+       … while calling the 'mul' builtin
+         at «string»:1:19:
+            1|  set@{a,b,...}:a*b*set.c
+             |                   ^
+
+       error: attribute 'c' missing
+       at «string»:1:20:
+            1|  set@{a,b,...}:a*b*set.c
+             |                    ^
+       Did you mean one of a or b?
+```
+
+- Advantages of using argument sets:
+  - Named unordered arguments: don't have to remember the order of the arguments.
+  - Can pass sets, that adds a new layer of flexibility and convenience.
+- Disadvantages:
+  - Partial application does not work with argument sets. You have to specify the whole attribute set, not part of it.
+You may find similarities with **Python **kwargs**.
