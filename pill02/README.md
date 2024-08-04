@@ -139,3 +139,51 @@ nix-repl> "\${foo}"
 nix-repl> ''foo ''${foo} foo''
 "foo \${foo} foo"
 ```
+
+## Lists:
+
+> sequence of expressions delimited by space (not comma)
+
+```nix
+nix-repl> [true "1APPPS" 45 "${foo}" (5*45)]
+[
+  true
+  "1APPPS"
+  45
+  "PPS is here"
+  225
+]
+```
+* Lists in Nix, are immutable. 
+* Adding or removing elements from a list is possible, but will return a new list.
+
+## Attribute Sets:
+> It is an association between `string keys` and `Nix values`. Keys can only be strings. When writing attribute sets you can also use unquoted identifiers as keys
+
+```nix
+nix-repl> s = {faa = "${foo}"; tru = true; a-b = (2-4); num = "number";}
+
+nix-repl> s
+{
+  a-b = -2;
+  faa = "PPS is here";
+  num = "number";
+  tru = true;
+}
+```
+
+access elements in the attribute set:
+
+```nix
+nix-repl> s.a-b
+-2
+
+nix-repl> s.faa
+"PPS is here"
+
+nix-repl> s.num
+"number"
+
+nix-repl> s.tru
+true
+```
