@@ -7,7 +7,7 @@
 nix-env -i hello
 ```
 **Location**: `~/.nix-profile/bin/hello` ($ which hello)
-**Derivation Path**: `hello-2.12.1  /nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1` ($ nix-env -q --out-path)
+<br>**Derivation Path**: `hello-2.12.1  /nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1` ($ nix-env -q --out-path)
 
 > **Listing of generations:** lists all the generations of a particular package installed on your system using Nix.
 ```bash
@@ -28,13 +28,14 @@ nix-env -q
 ```
 
 ## Path Merging:
-**Path merging** in Nix generally refers to the process of combining the output paths of multiple derivations into a single, unified directory structure.
+>> **Path merging** in Nix generally refers to the process of combining the output paths of multiple derivations into a single, unified directory structure.
+
 > **man:** to get man support inside the nix env.
 ```bash
 nix-env -i man-db
 ```
 **Location**: `~/.nix-profile/bin/man` ($ which man)
-**Derivation Path**: `man-db-2.12.1  /nix/store/k46l5ki5ppfsrbz0wpzxs707zxk9s669-man-db-2.12.1` ($ nix-env -q --out-path)
+<br>**Derivation Path**: `man-db-2.12.1  /nix/store/k46l5ki5ppfsrbz0wpzxs707zxk9s669-man-db-2.12.1` ($ nix-env -q --out-path)
 
 > Locate All the binaries:
 ```bash
@@ -58,7 +59,7 @@ lrwxrwxrwx - root  1 Jan  1970  whatis -> /nix/store/k46l5ki5ppfsrbz0wpzxs707
 All of the environment components point to the store.
 To query and manipulate the store, there's the `nix-store` command.
 
-> Get Runtime dependencies of `store`
+> Get Runtime dependencies of `hello`
 ```bash
 nix-store -q --references `which hello`
 ```
@@ -85,7 +86,7 @@ nix-store -q --referrers `which hello`
 * The **manifest.nix**(`~/.nix-profile/manifest.nix`) file contains metadata about the environment, such as which derivations are installed. So that nix-env can list, upgrade or remove them.
 
 ## Closures
-The closures of a derivation is a list of all its dependencies, recursively, including absolutely everything necessary to use that derivation.
+>> The closures of a derivation is a list of all its dependencies, recursively, including absolutely everything necessary to use that derivation.
 
 ```bash
 nix-store -qR `which hello`
@@ -117,3 +118,18 @@ nix-store -q --tree `which hello`
 ```
 
 *  it shows you a tree-like structure of packages that ultimately rely on the `hello`.
+
+
+## Channels:
+
+>> There's a list of channels from which we get packages, although usually we use a single channel. The tool to manage channels is `nix-channel`.
+
+```bash
+nix-channel --list
+
+# If using NixOS, you may not see any output from the above command (if you're using the default),
+# or you may see a channel whose name begins with "nixos-" instead of "nixpkgs".<br>
+```
+**Location**: `~/.nix-channels` (its not a symlink to nix store)<br>
+**Update**: `nix-channel --update` (to update channel)<br>
+new generation of the channels profile can be made under `~/.nix-defexpr/channels`
