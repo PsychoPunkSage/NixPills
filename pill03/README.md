@@ -57,3 +57,42 @@ nix-repl> tmul 32
 nix-repl> tmul 32 23
 736
 ```
+
+## Argument Set:
+
+> It is possible to pattern match over a set in the parameter.
+
+using a *set as argument*:
+```nix
+nix-repl> tmul = set: set.x * set.y
+
+nix-repl> tmul
+«lambda @ «string»:1:2»
+
+nix-repl> tmul {x = 12; y = 10;}
+120
+```
+
+using *pattern matching*:
+```nix
+nix-repl> tmul = {a, b}: a*b
+
+nix-repl> tmul
+«lambda @ «string»:1:2»
+
+nix-repl> tmul {x = 12; y = 10;}
+error:
+       … from call site
+         at «string»:1:1:
+            1| tmul {x = 12; y = 10;}
+             | ^
+
+       error: function 'anonymous lambda' called without required argument 'a'
+       at «string»:1:2:
+            1|  {a, b}: a*b
+             |  ^
+
+nix-repl> tmul {a = 12; b = 10;}
+120
+```
+* Only a set with exactly the attributes required by the function is accepted, nothing more, nothing less. (NOT even different name)
