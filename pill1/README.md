@@ -83,3 +83,37 @@ nix-store -q --referrers `which hello`
 * Our environments depend upon `hello` i.e. the environments are in the store, and since they contain symlinks to `hello`, therefore the environment depends upon `hello`.
 * Two environments were listed, generation 2 and generation 3, since these are the ones that had hello installed in them.
 * The **manifest.nix**(`~/.nix-profile/manifest.nix`) file contains metadata about the environment, such as which derivations are installed. So that nix-env can list, upgrade or remove them.
+
+## Closures
+The closures of a derivation is a list of all its dependencies, recursively, including absolutely everything necessary to use that derivation.
+
+```bash
+nix-store -qR `which hello`
+```
+
+```
+/nix/store/560z0zfybsjb8m76n67x6c1k7gpm080w-libunistring-1.2
+/nix/store/70x99mlxawd915q5nfj4swxjjnjw1ahy-libidn2-2.3.7
+/nix/store/dffyikn59cy7fff2qd60gs9jl63szqnh-xgcc-13.3.0-libgcc
+/nix/store/0wydilnf1c9vznywsvxqnaing4wraaxp-glibc-2.39-52
+/nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1
+```
+* Copying all those derivations to the **Nix store of another machine** makes you able to run `hello` out of the box on that other machine. (0 issues possible)
+
+```bash
+nix-store -q --tree `which hello`
+```
+
+```
+/nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1
+├───/nix/store/0wydilnf1c9vznywsvxqnaing4wraaxp-glibc-2.39-52
+│   ├───/nix/store/70x99mlxawd915q5nfj4swxjjnjw1ahy-libidn2-2.3.7
+│   │   ├───/nix/store/560z0zfybsjb8m76n67x6c1k7gpm080w-libunistring-1.2
+│   │   │   └───/nix/store/560z0zfybsjb8m76n67x6c1k7gpm080w-libunistring-1.2 [...]
+│   │   └───/nix/store/70x99mlxawd915q5nfj4swxjjnjw1ahy-libidn2-2.3.7 [...]
+│   ├───/nix/store/dffyikn59cy7fff2qd60gs9jl63szqnh-xgcc-13.3.0-libgcc
+│   └───/nix/store/0wydilnf1c9vznywsvxqnaing4wraaxp-glibc-2.39-52 [...]
+└───/nix/store/4prjbnvjp40kkqjds62ywy9sr94j9g4b-hello-2.12.1 [...]
+```
+
+*  it shows you a tree-like structure of packages that ultimately rely on the `hello`.
