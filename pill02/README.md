@@ -59,3 +59,83 @@ nix-repl> builtins.div 6 3
 
 - Nix is `strongly typed`, but it's `not statically typed`. That is, you *cannot mix strings and integers*, you must first do the conversion
 - Expressions will be `parsed as paths` as long as there's a `slash` not followed by a `space`
+
+## Identifier:
+
+`dash (-)` is allowed in identifiers, since many packages use dash in their names.
+
+```nix 
+nix-repl> a-b
+error: undefined variable 'a-b'
+       at «string»:1:1:
+            1| a-b
+             | ^
+
+nix-repl> a - b
+error: undefined variable 'a'
+       at «string»:1:1:
+            1| a - b
+             | ^
+```
+
+## Strings:
+
+> Strings are enclosed by *double quotes* `(")`, or *two single quotes* `('')`
+
+```nix
+nix-repl> "foo"
+"foo"
+
+nix-repl> ''foo''
+"foo"
+```
+
+interpolate whole Nix expressions inside strings
+```nix
+nix-repl> foo = "PPS is here"
+
+nix-repl> "${foo}"
+"PPS is here"
+
+nix-repl> ''${foo}''
+"PPS is here"
+
+nix-repl> "$f oo"
+"$foo"
+
+nix-repl> $foo
+error: syntax error, unexpected invalid token
+       at «string»:1:1:
+            1| $foo
+             | ^
+
+nix-repl> "${2+3}"
+error:
+       … while evaluating a path segment
+         at «string»:1:2:
+            1| "${2+3}"
+             |  ^
+
+       error: cannot coerce an integer to a string: 5
+```
+
+*  Cannot mix integers and strings. You need to explicitly include conversions.
+
+**Escaping `"`:** (use `''`)
+
+```nix
+nix-repl> ''AP is " here''
+"AP is \" here"
+
+nix-repl> ''AP is " here"''
+"AP is \" here\""
+```
+
+**Escaping `${...}`:**
+```nix
+nix-repl> "\${foo}"
+"\${foo}"
+
+nix-repl> ''foo ''${foo} foo''
+"foo \${foo} foo"
+```
