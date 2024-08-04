@@ -97,7 +97,7 @@ nix-repl> tmul {a = 12; b = 10;}
 ```
 * Only a set with exactly the attributes required by the function is accepted, nothing more, nothing less. (NOT even different name)
 
-## Default and variadic attributes
+## Default and variadic attributes:
 
 > We can specify `default values` of attributes in the argument set
 ```nix
@@ -151,3 +151,58 @@ error:
 - Disadvantages:
   - Partial application does not work with argument sets. You have to specify the whole attribute set, not part of it.
 You may find similarities with **Python **kwargs**.
+
+## Imports:
+
+>> The `import` function is built-in and provides a way to parse a `.nix` file. The natural approach is to define each component in a `.nix` file, then compose by importing these files.
+
+```
+Define below files:
+    1. a.nix
+        4
+    2. b.nix
+        32
+    3. mul.nix
+        a: b: a*a + b*b
+```
+
+```nix
+nix-repl> a = import ./pill03/a.nix
+
+nix-repl> b = import ./pill03/b.nix
+
+nix-repl> a
+4
+
+nix-repl> b
+32
+
+nix-repl> mul = import ./pill03/mul.nix
+
+nix-repl> mul
+«lambda @ /home/psychopunk_sage/dev/nix-pills/pill03/mul.nix:1:1»
+
+nix-repl> mul a b
+1040
+```
+
+**complex example**:
+```nix
+nix-repl> test = import ./pill03/test.nix
+
+nix-repl> test
+«lambda @ /home/psychopunk_sage/dev/nix-pills/pill03/test.nix:1:1»
+
+nix-repl> test {a = 4; truMsg = "Ok"; flsMsg = "Wrong";}
+trace: Wrong
+false
+
+nix-repl> test {a = 100; truMsg = "Ok"; flsMsg = "Wrong";}
+trace: Ok
+true
+```
+
+**Explanation**:
+* `test.nix`: returns a function. It accepts a set, with default attributes `b`, `trueMsg` and `falseMsg`.
+* `builtins.trace` is a built-in function that takes *two arguments*. The **first** is the **message to display**, the **second** is the **value to return**.
+* Then we import `test.nix`, and call the function.
