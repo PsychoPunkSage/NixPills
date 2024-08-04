@@ -187,3 +187,115 @@ nix-repl> s.num
 nix-repl> s.tru
 true
 ```
+
+**Recurssive Atrtibute sets:**
+Inside an attribute set you cannot normally refer to elements of the same attribute set. To do so, use recursive attribute sets:
+```nix
+nix-repl> rec {a = "54"; b = a + " PPS is here";}
+{
+  a = "54";
+  b = "54 PPS is here";
+}
+```
+
+## If expressions:
+
+> These are expressions, not statements.<br>
+> You can't have only the `then` branch, you must specify also the `else` branch, because an expression must have a value in all cases.
+
+```nix
+nix-repl> a = 3
+
+nix-repl> b = 4
+
+nix-repl> if a > b then "3 > 4" else "4 > 3"
+"4 > 3"
+```
+
+## Let expressions:
+
+> * Used to define local variables for inner expressions.
+> * First assign variables, then `in`, then an expression which can use the defined variables.
+> * The value of the whole let expression will be the value of the expression after the in.
+
+```nix
+nix-repl> let a = "${foo}"; in a
+"PPS is here"
+
+nix-repl> let a = "${foo}"; b = "-${foo}--${foo}"; in a + b
+"PPS is here-PPS is here--PPS is here"
+
+nix-repl> let a = 3; in let b = 4; in a + b
+7
+```
+
+With let you cannot assign twice to the same variable. However, you can shadow outer variables:
+```nix
+nix-repl> let a = 3; a = 8; in a
+error: attribute 'a' already defined at «string»:1:5
+       at «string»:1:12:
+            1| let a = 3; a = 8; in a
+             |            ^
+
+nix-repl> let a = 3; in let a = 8; in a
+8
+```
+
+cannot refer to variables in a let expression outside of it:
+```nix
+nix-repl> let a = (let c = 3; in c); in c
+error: undefined variable 'c'
+       at «string»:1:31:
+            1| let a = (let c = 3; in c); in c
+             |                               ^
+```
+
+Can refer to variables in the `let` expression when assigning variables, like with recursive attribute sets:
+```nix
+nix-repl> let a = 4; b = a + 5; in b
+9
+```
+
+> **WARNING:** beware when you want to refer to a variable from the outer scope, but it's also defined in the current `let` expression. The same applies to recursive attribute sets.
+
+## With Expressions:
+
+> Its something like a more granular version of `using` from C++, or `from module import *` from Python
+
+```nix
+nix-repl> numadd = {a1 = 13; b1 = 23; c1 = 43;}
+
+nix-repl> numadd.a1 + numadd.b1
+36
+
+nix-repl> numadd.a1 + numadd.b1 + numadd.c1
+79
+
+nix-repl> with numadd; a1 + b1 + c1
+79
+
+nix-repl> numadd = {a = 13; b = 23; c1 = 43;}
+
+nix-repl> with numadd; a + b + c1
+50
+```
+
+* [case 4] If a symbol exists in the `outer scope` and would also be introduced by the `with`, it will **not be shadowed**. (Here a == 3 and b == 4 and c1 == 43)
+
+```nix
+let a = 10; in with numadd; a+c
+53
+```
+
+* Let has the capacity to Shadow the outer scope var (only within its scope).
+
+## Laziness
+
+> Nix evaluates expressions only when needed. This is a great feature when working with packages.
+
+```nix
+nix-repl> let a = builtins.div 4 0; b = 6; in b
+6
+```
+* Since `a` is not needed, there's no error about division by zero, because the expression is not in need to be evaluated.
+* That's why we can *have all the packages defined* on demand, yet have *access to specific packages* very quickly.
