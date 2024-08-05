@@ -23,7 +23,7 @@ nix-repl> drv
 * `nix repl` does not build derivations unless you tell it to do so.
 * it didn't build derivation, but it did **create the .drv file**.
 
-## Digression about .drv files
+## Digression about .drv files:
 
 >> It is the specification of how to build the derivation
 
@@ -123,7 +123,7 @@ this derivation will be built:
 error: a 'PPS_system' with features {} is required to build '/nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv', but I am a 'x86_64-linux' with features {benchmark, big-parallel, kvm, nixos-test, uid-range}
 ```
 
-## Derivation set
+## Derivation set:
 
 **Check for Attributes:**
 ```nix
@@ -185,3 +185,123 @@ nix-repl> drv.all
 nix-repl> drv.drvPath
 "/nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv"
 ```
+
+## Referring Other derivations:
+
+> We use the `outPath`. The `outPath` describes the location of the files of a derivation. To make it more convenient, Nix is able to do a conversion from a derivation set to a string.
+
+```nix
+nix-repl> drv.outPath
+"/nix/store/ffcqjrgix8v9zzg89xp7lqmjd11hwhrm-PPS"
+
+nix-repl> builtins.toString drv
+"/nix/store/ffcqjrgix8v9zzg89xp7lqmjd11hwhrm-PPS"
+```
+
+* Nix does the **set to string conversion** as long as there is the `outPath` attribute
+
+```nix
+nix-repl> d = {outPath = "Yooo";}
+
+nix-repl> builtins.toString d
+"Yooo"
+
+nix-repl> builtins.toString {a = "Yooo";}
+error:
+       … while calling the 'toString' builtin
+         at «string»:1:1:
+            1| builtins.toString {a = "Yooo";}
+             | ^
+
+       … while evaluating the first argument passed to builtins.toString
+
+       error: cannot coerce a set to a string: { a = "Yooo"; }
+```
+
+**Using Binaries from coreutils**
+
+```nix
+nix-repl> coreutils
+error: undefined variable 'coreutils'
+       at «string»:1:1:
+            1| coreutils
+             | ^
+
+nix-repl> :l <nixpkgs>
+Added 22251 variables.
+
+nix-repl> coreutils
+«derivation /nix/store/9rwm5zhxx7bpxff9lddvms78shdipib2-coreutils-9.5.drv»
+
+nix-repl> coreutils.outPath
+"/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5"
+
+nix-repl> "${coreutils}/bin/true"
+"/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5/bin/true"
+```
+
+## An almost working derivation:
+
+```nix
+nix-repl> realDrv = derivation {name = "PPS_V1"; system = builtins.currentSystem; builder = "${coreutils}/bin/true";}
+
+nix-repl> realDrv.drvAttrs
+{
+  builder = "/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5/bin/true";
+  name = "PPS_V1";
+  system = "x86_64-linux";
+}
+
+nix-repl> :b realDrv
+error: builder for '/nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv' failed to produce output path for output 'out' at '/nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv.chroot/root/nix/store/68d7f2xrsy22wy0jzzxn85ws1zyy6g1d-PPS_V1'
+[0 built (1 failed), 4 copied (1 failed) (2.3 MiB), 0.8 MiB DL]
+```
+* **Obvious note**: every time we change the derivation, a new hash is created.
+
+**Examine .drv file**
+```bash
+nix derivation show /nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv
+```
+
+<details>
+<summary>
+Output
+</summary>
+
+```
+warning: The interpretation of store paths arguments ending in `.drv` recently changed. If this command is now failing try again with '/nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv^*'
+{
+  "/nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv": {
+    "args": [],
+    "builder": "/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5/bin/true",
+    "env": {
+      "builder": "/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5/bin/true",
+      "name": "PPS_V1",
+      "out": "/nix/store/68d7f2xrsy22wy0jzzxn85ws1zyy6g1d-PPS_V1",
+      "system": "x86_64-linux"
+    },
+    "inputDrvs": {
+      "/nix/store/9rwm5zhxx7bpxff9lddvms78shdipib2-coreutils-9.5.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      }
+    },
+    "inputSrcs": [],
+    "name": "PPS_V1",
+    "outputs": {
+      "out": {
+        "path": "/nix/store/68d7f2xrsy22wy0jzzxn85ws1zyy6g1d-PPS_V1"
+      }
+    },
+    "system": "x86_64-linux"
+  }
+}
+```
+
+</details><br>
+
+* Nix added a dependency to our `.drv`, it's the `coreutils.drv`. 
+* Before doing our build, Nix should build the `coreutils.drv`. Since coreutils is already in our nix store, no build is needed
+* out path (coreutils): `/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5`
