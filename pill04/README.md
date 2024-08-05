@@ -78,4 +78,110 @@ This it the minimum necessary information to build our derivation.
 > * The `builder` will not inherit any variable from the running shell, otherwise builds would suffer from non-determinism.
 > * So the `Environment variables` are passed to the builder (those you see in the .drv) along with some other Nix related configuration (number of cores, temp dir, ...).
 
+<details>
+<summary>
+    Non-determinism
+</summary>
+
+```
+- build process would produce different results depending on factors outside the defined build environment.
+```
+```
+- if the builder inherited variables from your running shell, the build could produce different results on different machines or at different times, even with the same code and inputs. This is because shell environments can vary between systems and over time.
+```
+```
+- isolating the build environment and using only the defined variables in the .drv file, Nix ensures reproducible and deterministic builds.
+```
+
+</details><br>
+
 **Build Fake Derivation:**
+
+1. With `nix repl`
+```nix
+nix-repl> drv = derivation {name = "PPS"; builder = "PPS_builder"; system = "PPS_system";}
+
+nix-repl> drv
+«derivation /nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv»
+
+nix-repl> :b drv
+error: a 'PPS_system' with features {} is required to build '/nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv', but I am a 'x86_64-linux' with features {benchmark, big-parallel, kvm, nixos-test, uid-range}
+[0 copied (1 failed), 0.0 MiB DL]
+```
+
+* The `:b` is a `nix repl` specific command to build a derivation.
+
+2. With `nix-store`
+
+```bash
+nix-store -r /nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv
+```
+
+```
+this derivation will be built:
+  /nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv
+error: a 'PPS_system' with features {} is required to build '/nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv', but I am a 'x86_64-linux' with features {benchmark, big-parallel, kvm, nixos-test, uid-range}
+```
+
+## Derivation set
+
+**Check for Attributes:**
+```nix
+nix-repl> drv = derivation {name = "PPS"; builder = "PPS_builder"; system = "PPS_system";}
+
+nix-repl> builtins.isAttrs drv
+true
+
+nix-repl> builtins.attrNames drv
+[
+  "all"
+  "builder"
+  "drvAttrs"
+  "drvPath"
+  "name"
+  "out"
+  "outPath"
+  "outputName"
+  "system"
+  "type"
+]
+```
+
+* `builtins.isAttrs`: returns true if the argument is a set. 
+* `builtins.attrNames`: returns a list of keys of the given set.
+
+**drvAttrs:**
+```nix
+nix-repl> drv.drvAttrs
+{
+  builder = "PPS_builder";
+  name = "PPS";
+  system = "PPS_system";
+}
+
+nix-repl> drv.name
+"PPS"
+
+nix-repl> drv.builder
+"PPS_builder"
+
+nix-repl> drv.system
+"PPS_system"
+
+nix-repl> drv == drv.out
+true
+
+nix-repl> drv.all
+[
+  «derivation /nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv»
+]
+```
+
+* `out` is just the derivation itself. (*reason*: we only have one output from the derivation.)
+* That's also the reason why `d.all` is a singleton
+
+**drvPath:** path of the `.drv` file
+```nix
+nix-repl> drv.drvPath
+"/nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv"
+```
