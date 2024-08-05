@@ -305,3 +305,12 @@ warning: The interpretation of store paths arguments ending in `.drv` recently c
 * Nix added a dependency to our `.drv`, it's the `coreutils.drv`. 
 * Before doing our build, Nix should build the `coreutils.drv`. Since coreutils is already in our nix store, no build is needed
 * out path (coreutils): `/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5`
+
+## When is the derivation built:
+
+> Nix does not build derivations **during evaluation** of Nix expressions. So, we have to do `:b drv` in `nix repl`, or use `nix-store -r`.
+>   * **Instantiate/Evaluation time**: Nix expression is parsed, interpreted and finally returns a derivation set. During evaluation, you can refer to other derivations because Nix will create .drv files and we will know out paths beforehand.
+>   * **Realise/Build time**: the .drv from the derivation set is built, first building .drv inputs (build dependencies). This is achieved with `nix-store -r`.
+
+* Think of it as of compile time and link time like with C/C++ projects. You first compile all source files to object files. Then link object files in a single executable.
+* In Nix, first the Nix expression (usually in a .nix file) is compiled to .drv, then each .drv is built and the product is installed in the relative out paths.
