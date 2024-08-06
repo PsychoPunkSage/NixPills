@@ -163,3 +163,10 @@ Unlike autotools, Nix doesn't use --prefix to install files to a global location
 ```
 
 </details><br>
+
+## The .drv contents
+
+We added something else to the derivation this time: the `args attribute`.
+* Nix automatically copies files or directories needed for the build into the store to ensure that they are not changed during the build process and that the deployment is stateless and independent of the building machine.
+* `builder.sh` is not only in the arguments passed to the builder, it's also in the input sources.
+* Given that `builder.sh` is a plain file, it has no .drv associated with it. The store path is computed based on the filename and on the hash of its contents
