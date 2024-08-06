@@ -92,7 +92,74 @@ nix derivation show  /nix/store/i2j3gjdxhch7amlac04swlyr9amd66d5-PPS_workable
 }
 ```
 
-<details><br>
+</details><br>
 
 ## The builder environment
 
+> We can use `nix-store --read-log` to see the logs our builder produced
+
+```bash
+nix-store --read-log /nix/store/i2j3gjdxhch7amlac04swlyr9amd66d5-PPS_workable
+```
+
+<details>
+<summary>
+Output
+</summary>
+
+```json
+declare -x HOME="/homeless-shelter"
+declare -x NIX_BUILD_CORES="12"
+declare -x NIX_BUILD_TOP="/build"
+declare -x NIX_LOG_FD="2"
+declare -x NIX_STORE="/nix/store"
+declare -x OLDPWD
+declare -x PATH="/path-not-set"
+declare -x PWD="/build"
+declare -x SHLVL="1"
+declare -x TEMP="/build"
+declare -x TEMPDIR="/build"
+declare -x TERM="xterm-256color"
+declare -x TMP="/build"
+declare -x TMPDIR="/build"
+declare -x builder="/nix/store/i1x9sidnvhhbbha2zhgpxkhpysw6ajmr-bash-5.2p26/bin/bash"
+declare -x name="PPS_workable"
+declare -x out="/nix/store/i2j3gjdxhch7amlac04swlyr9amd66d5-PPS_workable"
+declare -x system="x86_64-linux"
+```
+
+</details><br>
+
+Inspection of **Output**:
+* `$HOME` is not your home directory, and `/homeless-shelter` doesn't exist at all. We force packages not to depend on `$HOME` during the build process.
+* `$PATH` plays the same game as `$HOME`
+* `$NIX_BUILD_CORES` and `$NIX_STORE` are nix configuration options ([more](https://nixos.org/manual/nix/stable/command-ref/conf-file))
+* `$PWD` and `$TMP` clearly show that nix created a temporary build directory
+* Then `$builder`, `$name`, `$out`, and `$system` are variables set due to the .drv file's contents.
+
+And that's how we were able to use `$out`(in `builder.sh`) in our derivation and put stuff in it. It's like Nix reserved a slot in the nix store for us, and we must fill it.
+
+In terms of autotools, `$out` will be the `--prefix` path. Yes, not the make `DESTDIR`, but the `--prefix`. That's the essence of stateless packaging. You don't install the package in a global common path under `/`, you install it in a local isolated path under your nix store slot.
+
+
+<details>
+<summary>
+More Info
+</summary>
+
+```
+$out: 
+This represents the final location where your package's files will be installed. It's like a specific folder where all the files related to your package will be placed. This folder is isolated from your system's regular file structure.
+```
+
+```
+--prefix: 
+This is a common flag used in many build systems (like autotools) to specify the installation prefix. It's where the built files will be copied.
+```
+
+```
+Nix vs Autotools: 
+Unlike autotools, Nix doesn't use --prefix to install files to a global location (like /usr/local). Instead, it uses $out to install everything within a specific, isolated directory.
+```
+
+</details><br>
