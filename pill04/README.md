@@ -38,6 +38,11 @@ nix-repl> drv
 $ nix derivation show /nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv
 ```
 
+<details>
+<summary>
+Output
+</summary>
+
 ```json
 {
   "/nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv": {
@@ -61,6 +66,8 @@ $ nix derivation show /nix/store/slk7f6m75xcygkxpbbvwjxrgijm7n8if-PPS.drv
   }
 }
 ```
+
+</details><br>
 
 **Theory:**
 * We can see there's an out path, but it does not exist yet. We never told Nix to build it, but we know beforehand where the build output will be. 
@@ -268,7 +275,7 @@ nix derivation show /nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv
 Output
 </summary>
 
-```
+```json
 warning: The interpretation of store paths arguments ending in `.drv` recently changed. If this command is now failing try again with '/nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv^*'
 {
   "/nix/store/khzqfjq6hpfvf84cjqblrb5c7vwg51r0-PPS_V1.drv": {

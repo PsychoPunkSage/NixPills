@@ -44,3 +44,4 @@
 2. [Pill 2](https://github.com/PsychoPunkSage/NixPills/tree/main/pill02) - Basics of the Nix language
 3. [Pill 3](https://github.com/PsychoPunkSage/NixPills/tree/main/pill03) - Function + Imports
 4. [Pill 4](https://github.com/PsychoPunkSage/NixPills/tree/main/pill04) - First Derivation
+5. [Pill 5](https://github.com/PsychoPunkSage/NixPills/tree/main/pill05) - First Workable Derivation
