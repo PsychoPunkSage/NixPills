@@ -139,7 +139,7 @@ Inspection of **Output**:
 
 And that's how we were able to use `$out`(in `builder.sh`) in our derivation and put stuff in it. It's like Nix reserved a slot in the nix store for us, and we must fill it.
 
-In terms of autotools, `$out` will be the `--prefix` path. Yes, not the make `DESTDIR`, but the `--prefix`. That's the essence of stateless packaging. You don't install the package in a global common path under `/`, you install it in a local isolated path under your nix store slot.
+In terms of **autotools**, `$out` will be the `--prefix` path. Yes, not the make `DESTDIR`, but the `--prefix`. That's the essence of stateless packaging. You don't install the package in a global common path under `/`, you install it in a local isolated path under your nix store slot.
 
 
 <details>
@@ -169,4 +169,41 @@ Unlike autotools, Nix doesn't use --prefix to install files to a global location
 We added something else to the derivation this time: the `args attribute`.
 * Nix automatically copies files or directories needed for the build into the store to ensure that they are not changed during the build process and that the deployment is stateless and independent of the building machine.
 * `builder.sh` is not only in the arguments passed to the builder, it's also in the input sources.
-* Given that `builder.sh` is a plain file, it has no .drv associated with it. The store path is computed based on the filename and on the hash of its contents
+* Given that `builder.sh` is a plain file, it has no .drv associated with it. The store path is computed based on the filename and on the hash of its contents.
+
+## Packaging simple C program:
+
+`simple.c`
+```c
+void main() {
+    puts("Simple!");
+}
+```
+
+`simple)_builder.sh`
+```bash
+export PATH="$coreutils/bin:$gcc/bin"
+mkdir $out
+gcc -o $out/simple $src
+```
+
+**let's write the derivation and build it:**
+
+```nix
+nix-repl> simple = derivation { name = "simple"; builder = "${bash}/bin/bash"; args = [ ./simple_builder.sh ]; gcc = gcc; coreutils = coreutils; src = ./simple.c; system = builtins.currentSystem; }
+
+nix-repl> :b simple
+
+This derivation produced the following outputs:
+  out -> /nix/store/pgd7km0f11yilp2zhkz7zq2wb1jgs2fl-simple
+[2 built, 14 copied (2 failed) (268.5 MiB), 58.4 MiB DL]
+```
+
+**Running the program:**
+```bash
+/nix/store/pgd7km0f11yilp2zhkz7zq2wb1jgs2fl-simple/simple
+```
+
+```
+Simple!
+```
