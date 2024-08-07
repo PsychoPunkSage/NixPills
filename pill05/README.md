@@ -199,6 +199,69 @@ This derivation produced the following outputs:
 [2 built, 14 copied (2 failed) (268.5 MiB), 58.4 MiB DL]
 ```
 
+**Analysis**
+<details>
+<summary>
+Simple derivation
+</summary>
+
+```bash
+nix derivation show /nix/store/d57y171v8i1f76dyymppwaypfzcxscfq-simple.drv
+```
+
+```json
+{
+  "/nix/store/d57y171v8i1f76dyymppwaypfzcxscfq-simple.drv": {
+    "args": [
+      "/nix/store/4wpv68jkvw9nbnh4qcblnfvdfnn74kbn-simple_builder.sh"
+    ],
+    "builder": "/nix/store/i1x9sidnvhhbbha2zhgpxkhpysw6ajmr-bash-5.2p26/bin/bash",
+    "env": {
+      "builder": "/nix/store/i1x9sidnvhhbbha2zhgpxkhpysw6ajmr-bash-5.2p26/bin/bash",
+      "coreutils": "/nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5",
+      "gcc": "/nix/store/62zpnw69ylcfhcpy1di8152zlzmbls91-gcc-wrapper-13.3.0",
+      "name": "simple",
+      "out": "/nix/store/pgd7km0f11yilp2zhkz7zq2wb1jgs2fl-simple",
+      "src": "/nix/store/xxkcmj6vagqbfly000sh0cdcp154nwz9-simple.c",
+      "system": "x86_64-linux"
+    },
+    "inputDrvs": {
+      "/nix/store/9rwm5zhxx7bpxff9lddvms78shdipib2-coreutils-9.5.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/andlgvwhg8c8f42ijg15zgcdqp7girgq-gcc-wrapper-13.3.0.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/wzh01sawfkrvg2srg4jl8zprz1a347gy-bash-5.2p26.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      }
+    },
+    "inputSrcs": [
+      "/nix/store/4wpv68jkvw9nbnh4qcblnfvdfnn74kbn-simple_builder.sh",
+      "/nix/store/xxkcmj6vagqbfly000sh0cdcp154nwz9-simple.c"
+    ],
+    "name": "simple",
+    "outputs": {
+      "out": {
+        "path": "/nix/store/pgd7km0f11yilp2zhkz7zq2wb1jgs2fl-simple"
+      }
+    },
+    "system": "x86_64-linux"
+  }
+}
+```
+
+</details><br>
+
 **Running the program:**
 ```bash
 /nix/store/pgd7km0f11yilp2zhkz7zq2wb1jgs2fl-simple/simple
@@ -207,3 +270,13 @@ This derivation produced the following outputs:
 ```
 Simple!
 ```
+
+## Explanation
+
+- 2 new `attributes` added, `gcc` and `coreutils`
+  - `gcc = gcc`;, the name on the left is the name in the derivation set, and the name on the **right** refers to the **gcc derivation from nixpkgs**. The same applies for `coreutils`.
+- `src` attribute, nothing odd --- it's just a name, to which the path `./simple.c` is assigned. Like `simple-builder.sh`, `simple.c` will be added to the store.
+
+- **IMP:** every attribute in the set passed to `derivation` will be converted to a *string* and passed to the builder as an environment variable. This is how the builder gains access to coreutils and gcc: when converted to strings, the derivations evaluate to their output paths, and appending /bin to these leads us to their binaries.
+
+- The same goes for the `src` variable. `$src` is the path to simple.c in the nix store.
