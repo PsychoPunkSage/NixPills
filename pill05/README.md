@@ -280,3 +280,39 @@ Simple!
 - **IMP:** every attribute in the set passed to `derivation` will be converted to a *string* and passed to the builder as an environment variable. This is how the builder gains access to coreutils and gcc: when converted to strings, the derivations evaluate to their output paths, and appending /bin to these leads us to their binaries.
 
 - The same goes for the `src` variable. `$src` is the path to simple.c in the nix store.
+- In `simple_builder.sh` we set the `PATH` for *gcc* and *coreutils* binaries, so that our build script can find the necessary utilities like mkdir and gcc.
+
+## Proper Nix package
+
+`simple.nix`
+```nix
+let
+  pkgs = import <nixpkgs> { };
+in
+derivation {
+  name = "simple";
+  builder = "${pkgs.bash}/bin/bash";
+  args = [ ./simple_builder.sh ];
+  gcc = pkgs.gcc;
+  coreutils = pkgs.coreutils;
+  src = ./simple.c;
+  system = builtins.currentSystem;
+}
+```
+> build it with `nix-build simple.nix`. This will create a symlink **result** in the current directory, pointing to the out path of the derivation.
+
+
+nix-build does *two jobs*:
+* **nix-instantiate** : parse and evaluate `simple.nix` and return the .drv file corresponding to the parsed derivation set
+* **nix-store -r** : `realise the .drv file`, which actually builds it.
+
+* In the second line of `simple.nix`, we have an import function call. **import** accepts one argument, a nix file to load.
+* Afterwards, we call the function with the empty set. 
+
+* The value returned by the nixpkgs function is a set; more specifically, it's a set of derivations. Calling `import <nixpkgs> {}` into a let-expression creates the local variable pkgs and brings it into scope.
+* ~ `:l <nixpkgs>` we used in nix repl
+
+**inherit keyword**
+* `inherit foo`; is equivalent to foo = foo;.
+* `inherit gcc coreutils`; is equivalent to gcc = gcc; coreutils = coreutils;.
+* `inherit (pkgs) gcc coreutils`; is equivalent to gcc = pkgs.gcc; coreutils = pkgs.coreutils;.
