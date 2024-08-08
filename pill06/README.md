@@ -116,3 +116,57 @@ nix-repl> builtins.toString [gcc bash]
 nix-repl> builtins.toString [gcc bash binutils.bintools]
 "/nix/store/62zpnw69ylcfhcpy1di8152zlzmbls91-gcc-wrapper-13.3.0 /nix/store/i1x9sidnvhhbbha2zhgpxkhpysw6ajmr-bash-5.2p26 /nix/store/qsx2xqqm0lp6d8hi86r4y0rz5v9m62wn-binutils-2.42"
 ```
+
+## A more convenient derivation function
+
+> * in the hello.nix expression we are specifying tools that are common to more projects; we don't want to pass them every time.
+> * A natural approach would be to create a function that accepts an attribute set, similar to the one used by the derivation function, and merge it with another attribute set containing values common to many projects.
+
+**autotools.nix**
+```nix
+pkgs: attr:
+let
+    defaultAttrs = {
+        builder = "${pkgs.bash}/bin/bash";
+        system = builtins.currentSyatem;
+        args = [./builder.sh];
+        baseInuts = with pkgs; [
+            gnutar
+            gzip
+            gnumake
+            gcc
+            coreutils
+            gawk
+            gnused
+            gnugrep
+            binutils.bintools
+        ];
+        buildInputs = [ ];
+    };
+in
+derivation {defaultAttrs // attrs}
+```
+
+* This function accepts a parameter `pkgs`, then returns a function which accepts a parameter `attrs`.
+* The `// operator` is an operator between two sets. The result is the union of the two sets. In case of conflicts between attribute names, the value on the right set is preferred.
+* So we use `defaultAttrs` as base set, and add (or override) the attributes from `attrs`.
+
+```nix
+nix-repl> { a = "b"; } // { c = "d"; }
+{
+  a = "b";
+  c = "d";
+}
+
+nix-repl> { a = "b"; } // { a = "d"; }
+{ a = "d"; }
+```
+
+**Running Program**
+```bash
+/nix/store/a3q1xgx99pwk1lybvkha1g2gkq93cjhd-hello/bin/hello
+```
+
+```
+Hello, world!
+```
