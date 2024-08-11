@@ -128,7 +128,7 @@ pkgs: attr:
 let
     defaultAttrs = {
         builder = "${pkgs.bash}/bin/bash";
-        system = builtins.currentSyatem;
+        system = builtins.currentSystem;
         args = [./builder.sh];
         baseInuts = with pkgs; [
             gnutar
@@ -170,3 +170,16 @@ nix-repl> { a = "b"; } // { a = "d"; }
 ```
 Hello, world!
 ```
+
+**Hello.nix rewrite:**
+```nix
+let
+  pkgs = import <nixpkgs> { };
+  mkDerivation = import ./autotools.nix pkgs;
+in
+mkDerivation {
+  name = "hello";
+  src = ./hello-2.12.1.tar.gz;
+}
+```
+
