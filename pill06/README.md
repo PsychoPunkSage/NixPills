@@ -82,7 +82,7 @@ let
   pkgs = import <nixpkgs> { };
 in
 derivation {
-  name = "hello";
+  name = "PPS_hello";
   builder = "${pkgs.bash}/bin/bash";
   args = [ ./builder.sh ];
   buildInputs = with pkgs; [
@@ -164,12 +164,34 @@ nix-repl> { a = "b"; } // { a = "d"; }
 
 **Running Program**
 ```bash
-/nix/store/a3q1xgx99pwk1lybvkha1g2gkq93cjhd-hello/bin/hello
+nix-store -r /nix/store/797wlxrf70fdajsz6d8bmx54fkpkiand-PPS_hello.drv
 ```
+
+<details>
+<summary>
+Output
+</summary>
+
+```
+/nix/store/93vdrxwax2yvxz5i2zsbar1w68lk3cqz-PPS_hello
+```
+
+</details><br>
+
+```bash
+/nix/store/93vdrxwax2yvxz5i2zsbar1w68lk3cqz-PPS_hello/bin/hello
+```
+
+<details>
+<summary>
+Output
+</summary>
 
 ```
 Hello, world!
 ```
+
+</details><br>
 
 **Hello.nix rewrite:**
 ```nix
@@ -178,7 +200,7 @@ let
   mkDerivation = import ./autotools.nix pkgs;
 in
 mkDerivation {
-  name = "hello";
+  name = "PPS_hello";
   src = ./hello-2.12.1.tar.gz;
 }
 ```
