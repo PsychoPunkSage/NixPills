@@ -134,3 +134,23 @@ nix-store -q --references /nix/store/93vdrxwax2yvxz5i2zsbar1w68lk3cqz-PPS_hello
 /nix/store/93vdrxwax2yvxz5i2zsbar1w68lk3cqz-PPS_hello
 ```
 
+* `gcc` shouldn't be in this list!
+* It is present because of [ld rpath](http://en.wikipedia.org/wiki/Rpath):the list of directories where libraries can be found at runtime
+* In Nix, we have to refer to particular versions of libraries, and thus the rpath has an important role
+
+* The build process adds the `gcc` lib path thinking it may be useful at runtime, but this isn't necessary. To address issues like these, Nix provides a tool called **`patchelf`**, which reduces the rpath to the paths that are actually used by the binary.
+
+<details>
+<summary>
+ld rpath
+</summary>
+
+`ld` is a linker, a program that combines object files and libraries into an executable file.
+
+`rpath` is a linker option that specifies a set of directories to search for shared libraries when running the executable. It helps the operating system find the necessary libraries to execute the program correctly.
+
+**In simpler terms:**
+
+`ld` is the builder of a program, and `rpath` is the address book it uses to find the program's libraries when it runs.
+
+</details><br>
