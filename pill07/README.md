@@ -154,3 +154,13 @@ ld rpath
 `ld` is the builder of a program, and `rpath` is the address book it uses to find the program's libraries when it runs.
 
 </details><br>
+
+## Phases in the builder:
+
+The builder has six phases:
+1. The **environment setup** phase
+2. The **unpack phase**: we unpack the sources in the current directory (remember, Nix changes to a temporary directory first)
+3. The **change directory** phase, where we change source root to the directory that has been unpacked
+4. The **configure** phase: `./configure`
+5. The **build** phase: `make`
+6. The **install** phase: `make install`
