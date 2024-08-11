@@ -164,3 +164,78 @@ The builder has six phases:
 4. The **configure** phase: `./configure`
 5. The **build** phase: `make`
 6. The **install** phase: `make install`
+
+Now we will add a new phase after the installation phase, which we call the "fixup" phase. 
+
+At the end of the `builder.sh`, we append:
+```sh
+find $out -type f -exec patchelf --shrink-rpath '{}' \; -exec strip '{}' \; 2>/dev/null
+```
+
+* for each file we `run patchelf --shrink-rpath` and `strip`
+* Add `findutils` and `patchelf` to the baseInputs of autotools.nix
+
+```nix
+nix-repl> [patchelf findutils]
+[
+  «derivation /nix/store/7cfixbv0nijhn36f95wmhr6b9a4l53az-patchelf-0.15.0.drv»
+  «derivation /nix/store/4finnyc5dy4ibjjlp6ihwq7rrwb7hv1q-findutils-4.10.0.drv»
+]
+```
+
+Here is the final result after the build
+
+```sh
+nix-build hello.nix
+```
+<details>
+<summary>
+Output
+</summary>
+
+```
+this derivation will be built:
+  /nix/store/hifbqmp41jkb6m233zycmnxb49na5yjs-PPS_hello_trimmed.drv
+
+  ...........
+
+/nix/store/92g1yv9y8d41wpjc09d7qi7qmfxh6pwa-PPS_hello_trimmed
+```
+
+</details>
+
+```sh
+nix-store -r /nix/store/92g1yv9y8d41wpjc09d7qi7qmfxh6pwa-PPS_hello_trimmed/bin/hello
+```
+
+<details>
+<summary>
+Output
+</summary>
+
+```
+Hello, world!
+```
+
+</details>
+
+```sh
+nix-store -q --references /nix/store/92g1yv9y8d41wpjc09d7qi7qmfxh6pwa-PPS_hello_trimmed
+```
+
+<details>
+<summary>
+Output
+</summary>
+
+```
+/nix/store/0wydilnf1c9vznywsvxqnaing4wraaxp-glibc-2.39-52
+/nix/store/92g1yv9y8d41wpjc09d7qi7qmfxh6pwa-PPS_hello_trimmed
+```
+
+</details>
+
+```sh
+strings result/bin/hello| grep gcc
+# Gives no Output
+```
