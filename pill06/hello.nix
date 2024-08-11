@@ -3,7 +3,7 @@ let
   baseDrv = import ./autotools.nix pkgs; # passed pkgs (i.e. 1st parameter) -> this ill return a fn that will req. `attrs`
 in
 baseDrv {
-    name = "hello";
+    name = "PPS_hello";
     src = ./hello-2.12.1.tar.gz;
 }
 # derivation {
