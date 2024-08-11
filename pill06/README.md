@@ -183,3 +183,10 @@ mkDerivation {
 }
 ```
 
+## Conclusion
+
+* Nix gives us the bare metal tools for creating derivations, setting up a build environment and storing the result in the nix store.
+* Nix system is all about creating and composing derivations with the Nix language.
+* **Analogy:** in C you create objects in the heap, and then you compose them inside new objects. Pointers are used to refer to other objects.
+
+* In Nix you create derivations stored in the nix store, and then you compose them by creating new derivations. Store paths are used to refer to other derivations.
