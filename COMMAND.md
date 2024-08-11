@@ -18,3 +18,4 @@ nix-instantiate [filename: hello.nix]
 ```bash
 nix-store -q --references [derivation path]
 ```
+
