@@ -5,18 +5,71 @@
 
 ```sh
 $ nix-shell hello.nix
+```
+<details>
+<summary>
+Output
+</summary>
 
+```
 these 2 paths will be fetched (1.22 MiB download, 7.35 MiB unpacked):
-  /nix/store/c481fhrvslr8nmhhlzdab3k7bpnhb46a-bash-interactive-5.2p26
+  /nix/store/c481fhrvslr8nmhhlzdab3k7bpnhb46a-bash-interactive-5.**2p26**
   /nix/store/pblnj1749yp6wz28spkg0p774v0asfp0-readline-8.2p10
 copying path '/nix/store/pblnj1749yp6wz28spkg0p774v0asfp0-readline-8.2p10' from 'https://cache.nixos.org'...
 copying path '/nix/store/c481fhrvslr8nmhhlzdab3k7bpnhb46a-bash-interactive-5.2p26' from 'https://cache.nixos.org'...
 /home/psychopunk_sage/.nix-profile/bin/manpath: can't set the locale; make sure $LC_* and $LANG are correct
 direnv: error can't find bash: exec: "bash": executable file not found in $PATH
 ```
+
+</details><br>
+
+```sh
+$ nix-shell hello.nix
+ 23:31:30 make
+make: *** No targets specified and no makefile found.  Stop.
+
+ 23:31:33 echo $baseInputs
+```
+<details>
+<summary>
+Output
+</summary>
+
+```
+/nix/store/nzzl7dnay9jzgfv9fbwg1zza6ji7bjvr-gnutar-1.35 /nix/store/7m0l19yg0cb1c29wl54y24bbxsd85f4s-gzip-1.13 /nix/store/3ssglpx5xilkrmkhyl4bg0501wshmsgv-gnumake-4.4.1 /nix/store/62zpnw69ylcfhcpy1di8152zlzmbls91-gcc-wrapper-13.3.0 /nix/store/cnknp3yxfibxjhila0sjd1v3yglqssng-coreutils-9.5 /nix/store/2ywpssz17pj0vr4vj7by6aqx2gk01593-gawk-5.2.2 /nix/store/9zsm74npdqq2lgjzavlzaqrz8x44mq9d-gnused-4.9 /nix/store/k8zpadqbwqwalggnhqi74gdgrlf3if9l-gnugrep-3.11 /nix/store/qsx2xqqm0lp6d8hi86r4y0rz5v9m62wn-binutils-2.42 /nix/store/5my5b6mw7h9hxqknvggjla1ci165ly21-findutils-4.10.0 /nix/store/dv5vgsw8naxnkcc88x78vprbnn1pp44y-patchelf-0.15.0
+```
+
+</details><br>
+
 * expect that the GNU `hello` build inputs are available in `PATH`, including GNU `make`, but this is not the case.
-* we do have the environment variables that we set in the derivation, like $baseInputs, $buildInputs, $src. 
+* we do have the environment variables that we set in the derivation, like `$baseInputs`, `$buildInputs`, `$src`. 
 * i.e. we can `source` our `builder.sh`, and it will build the derivation.
+
+```sh
+ 23:33:37 source builder.sh
+...
+```
+* We sourced `builder.sh` and it ran all of the build steps, including setting up the `PATH` for us
+* The working directory is no longer a temp directory created by `nix-build`, but is instead the directory in which we entered the shell. Therefore, hello-2.10 has been unpacked in the current directory.
+
+We are able to `cd` into `hello-2.10` and type `make`, because `make` is now available.
+
+```sh
+ 23:41:10 make
+
+make  all-recursive
+make[1]: Entering directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.12.1'
+Making all in po
+make[2]: Entering directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.12.1/po'
+Makefile:170: warning: ignoring prerequisites on suffix rule definition
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.12.1/po'
+make[2]: Entering directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.12.1'
+make[2]: Leaving directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.12.1'
+make[1]: Leaving directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.12.1'
+```
+> **IMPORTANT**:<br>
+> The take-away is that `nix-shell` drops us in a shell with the same (or very similar) environment used to run the builder.
 
 ## A builder for nix-shell
 
