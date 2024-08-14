@@ -229,7 +229,7 @@ nix-repl> let a = 3; in let b = 4; in a + b
 7
 ```
 
-With let you cannot assign twice to the same variable. However, you can shadow outer variables:
+With `let` you cannot assign twice to the same variable. However, you can shadow outer variables:
 ```nix
 nix-repl> let a = 3; a = 8; in a
 error: attribute 'a' already defined at «string»:1:5
