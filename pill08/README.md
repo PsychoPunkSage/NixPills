@@ -73,4 +73,121 @@ make[1]: Leaving directory '/home/psychopunk_sage/dev/nix-pills/pill07/hello-2.1
 
 ## A builder for nix-shell
 
-When we sourced the `builder.sh` file, we obtained the file in the current directory. What we really wanted was the `builder.sh` that is stored in the nix store, as this is the file that would be used by nix-build
+> [POINT 1]
+
+
+When we sourced the `builder.sh` file, we obtained the file in the current directory. What we really wanted was the `builder.sh` that is stored in the **nix store**, as this is the file that would be used by `nix-build`
+
+To do this, we will pass an environment variable through the derivation.<br>
+**Note:** `$builder` is already defined, but it points to the `bash executable` rather than our `builder.sh`. Our `builder.sh` is passed as an argument to bash.
+
+```sh
+ 23:52:59 echo $builder
+/nix/store/i1x9sidnvhhbbha2zhgpxkhpysw6ajmr-bash-5.2p26/bin/bash
+```
+
+> [POINT 2]
+
+We can break `builder.sh` into two files: a `setup.sh` for setting up the environment, and the real `builder.sh` that `nix-build` expects.
+
+**Note:**  The `set -e` is annoying in nix-shell, as it will terminate the shell if an error is encountered.
+
+**`autotools.nix`**
+```nix
+pkgs: attrs:
+let 
+    defaultAttrs = {
+        builder = "${pkgs.bash}/bin/bash";
+        system = builtins.currentSystem;
+        args = [./builder.sh];
+        setup = ./setup.sh; # <<<<
+        baseInput = with pkgs; [
+            gnutar
+            gzip
+            gnumake
+            gcc
+            coreutils
+            gawk
+            gnused
+            gnugrep
+            binutils.bintools
+            patchelf
+            findutils
+        ];
+        buildInputs = [];
+    };
+in
+derivation (defaultAttrs // attrs)
+```
+
+**`builder.sh`**
+```sh
+set -e
+source $setup
+genericBuild
+```
+
+**`setup.sh`**
+```sh
+unset PATH
+for p in $baseInputs $buildInputs; do
+    export PATH=$p/bin${PATH:+:}$PATH
+done
+
+function unpackPhase() {
+    tar -xzf $src
+
+    for d in *; do
+    if [ -d "$d" ]; then
+        cd "$d"
+        break
+    fi
+    done
+}
+
+function configurePhase() {
+    ./configure --prefix=$out
+}
+
+function buildPhase() {
+    make
+}
+
+function installPhase() {
+    make install
+}
+
+function fixupPhase() {
+    find $out -type f -exec patchelf --shrink-rpath '{}' \; -exec strip '{}' \; 2>/dev/null
+}
+
+function genericBuild() {
+    unpackPhase
+    configurePhase
+    buildPhase
+    installPhase
+    fixupPhase
+}
+```
+
+**`hello.nix`**
+```nix
+let
+  pkgs = import <nixpkgs> { };
+  mkDerivation = import ./autotools.nix pkgs;
+in
+mkDerivation {
+  name = "hello";
+  src = ./hello-2.12.1.tar.gz;
+}
+```
+
+**in Nix-shell**
+```nix
+ 01:04:04 $setup
+bash: /nix/store/i8ykigqs5ljbzyc9xfss98hmaxh5g6sy-setup.sh: Permission denied
+                                                                                      �
+ 01:04:18 source $setup
+```
+
+* We can run `unpackPhase` which unpacks `$src` and enters the directory. And you can run commands like `./configure`, `make`, and so forth manually, or run phases with their respective functions.
