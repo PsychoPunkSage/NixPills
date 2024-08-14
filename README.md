@@ -46,4 +46,5 @@
 4. [Pill 4](https://github.com/PsychoPunkSage/NixPills/tree/main/pill04) - First Derivation
 5. [Pill 5](https://github.com/PsychoPunkSage/NixPills/tree/main/pill05) - First Workable Derivation
 6. [Pill 6](https://github.com/PsychoPunkSage/NixPills/tree/main/pill06) - Generic Builder
-6. [Pill 7](https://github.com/PsychoPunkSage/NixPills/tree/main/pill07) - Automatic Runtime Dependencies
+7. [Pill 7](https://github.com/PsychoPunkSage/NixPills/tree/main/pill07) - Automatic Runtime Dependencies
+8. [Pill 8](https://github.com/PsychoPunkSage/NixPills/tree/main/pill08) - Development with `nix-shell`
