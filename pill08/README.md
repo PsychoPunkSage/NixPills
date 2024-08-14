@@ -191,3 +191,8 @@ bash: /nix/store/i8ykigqs5ljbzyc9xfss98hmaxh5g6sy-setup.sh: Permission denied
 ```
 
 * We can run `unpackPhase` which unpacks `$src` and enters the directory. And you can run commands like `./configure`, `make`, and so forth manually, or run phases with their respective functions.
+
+> **TAKEWAY:**<br>
+> * `nix-shell` drops us into an isolated environment suitable for developing a project.
+> * environment provides the necessary dependencies for the development shell ~ `nix-build` provides the necessary dependencies to a builder.
+> * we can build and debug the project manually, executing step-by-step like we would in any other operating system.
